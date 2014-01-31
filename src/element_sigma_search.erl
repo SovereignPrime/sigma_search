@@ -71,13 +71,13 @@ render_element(Rec = #sigma_search{
 			#button{
 				id=SearchButtonid,
 				class=[sigma_search_button, SearchButtonClass],
-				text=SearchButtonText,
+				body=SearchButtonText,
 				postback=Postback,
 				delegate=?MODULE
 			},
 			#button{
 				id=Clearid,
-				text=ClearText,
+				body=ClearText,
 				class=[sigma_search_clear, ClearClass],
 				style="display:none",
 				click=[
