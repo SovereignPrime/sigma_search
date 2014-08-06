@@ -17,13 +17,14 @@ render_element(#sigma_search_badge{id=Id,
            class=["sigma_search_badge", "badge"],
            body=[
                  Type, ":", Text,
-                 #span{ class="", text="x", actions=#event{
+                 #span{ class="", text="  x", actions=#event{
                                                       type=click,
                                                       postback={remove, Id},
                                                       delegate=?MODULE
                                                       }}
                  
                 ]}.
+
 event({remove, Id}) -> % {{{1
     wf:remove(Id);
 event(E) -> % {{{1

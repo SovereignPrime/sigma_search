@@ -15,6 +15,7 @@
 		clearid,
 		resultsid,
         badgesid,
+        hiddenid,
 		tag,
 		delegate,
 		x_button_text,
@@ -40,6 +41,7 @@ render_element(Rec = #sigma_search{
 		x_button_text=XButtonText
 		}) ->
 	Textboxid = wf:temp_id(),
+    HiddenId = wf:temp_id(),
 	Resultsid = wf:temp_id(),
     BadgesId = wf:temp_id(),
 	SearchButtonid = wf:temp_id(),
@@ -52,6 +54,7 @@ render_element(Rec = #sigma_search{
 		textboxid=Textboxid,
 		resultsid=Resultsid,
         badgesid=BadgesId,
+        hiddenid=HiddenId,
 		clearid=Clearid,
 		results_summary_text=ResultsSummaryText,
 		results_summary_class=ResultsSummaryClass,
@@ -63,7 +66,7 @@ render_element(Rec = #sigma_search{
 		#panel{class=WrapperClass,body=[
             #panel{
                id=BadgesId,
-               class=["sigma_search_badges"],
+               class=["sigma_search_badges", "pull-left"],
                body=[]
               },
 			#textbox{
@@ -76,6 +79,8 @@ render_element(Rec = #sigma_search{
 					#event{type=keydown,postback=Postback,delegate=?MODULE}
 				]
 			},
+            #hidden{id=HiddenId,
+                    text=""},
 			#button{
 				id=SearchButtonid,
 				class=[sigma_search_button, SearchButtonClass],
@@ -108,18 +113,37 @@ event(#postback{
 		textboxid=Textboxid,
 		resultsid=Resultsid,
         badgesid=BadgesId,
+        hiddenid=HiddenId,
 		clearid=Clearid,
 		results_summary_text=ResultsSummaryText,
 		results_summary_class=ResultsSummaryClass,
 		x_button_class=XButtonClass,
 		x_button_text=XButtonText
 	}) ->
-	case wf:q(Textboxid) of
-		"" -> 
+    case {wf:q(Textboxid), wf:q(HiddenId)} of
+        {"", ""} -> 
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
-		Search ->
-			{Badges, Body} = Delegate:sigma_search_event(Tag, Search),
+        {"", _} -> 
+			wf:wire(Resultsid,#fade{}),
+			wf:wire(Clearid, #fade{});
+        {Search, Hidden} ->
+            All = if Hidden /= "" ->
+                         LastSearch = string:sub_word(Search, string:words(Search)),
+                         Hiddens = string:tokens(Hidden, " "),
+                         [ Last | RHiddens ] = lists:reverse(Hiddens),
+                         Pos = string:str(LastSearch, Last),
+                         PosB = string:str(Last, LastSearch),
+                         if  Pos == 0, PosB == 0 ->
+                                 string:join(Hiddens ++ [LastSearch], " ");
+                             true ->
+                                 string:join(RHiddens ++ [LastSearch], " ")
+                         end;
+                     true ->
+                         Search
+                  end,
+            wf:set(HiddenId, All),
+            {Badges, Body} = Delegate:sigma_search_event(Tag, All),
 
 			ResultsBody = [
 				#button{
