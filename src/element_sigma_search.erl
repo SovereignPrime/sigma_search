@@ -14,6 +14,7 @@
 		textboxid, 
 		clearid,
 		resultsid,
+        badgesid,
 		tag,
 		delegate,
 		x_button_text,
@@ -40,6 +41,7 @@ render_element(Rec = #sigma_search{
 		}) ->
 	Textboxid = wf:temp_id(),
 	Resultsid = wf:temp_id(),
+    BadgesId = wf:temp_id(),
 	SearchButtonid = wf:temp_id(),
 	Clearid = wf:temp_id(),
 	Delegate = wf:coalesce([Rec#sigma_search.delegate, wf:page_module()]),
@@ -49,6 +51,7 @@ render_element(Rec = #sigma_search{
 		tag=Tag,
 		textboxid=Textboxid,
 		resultsid=Resultsid,
+        badgesid=BadgesId,
 		clearid=Clearid,
 		results_summary_text=ResultsSummaryText,
 		results_summary_class=ResultsSummaryClass,
@@ -58,6 +61,11 @@ render_element(Rec = #sigma_search{
 
 	[
 		#panel{class=WrapperClass,body=[
+            #panel{
+               id=BadgesId,
+               class=["sigma_search_badges"],
+               body=[]
+              },
 			#textbox{
 				class=[sigma_search_textbox, TextboxClass],
 				postback=Postback,
@@ -99,6 +107,7 @@ event(#postback{
 		tag=Tag,
 		textboxid=Textboxid,
 		resultsid=Resultsid,
+        badgesid=BadgesId,
 		clearid=Clearid,
 		results_summary_text=ResultsSummaryText,
 		results_summary_class=ResultsSummaryClass,
@@ -110,7 +119,7 @@ event(#postback{
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
 		Search ->
-			{Num, Body} = Delegate:sigma_search_event(Tag, Search),
+			{Badges, Body} = Delegate:sigma_search_event(Tag, Search),
 
 			ResultsBody = [
 				#button{
@@ -118,13 +127,10 @@ event(#postback{
 					class=[sigma_search_x_button, XButtonClass],
 					click="objs('" ++ Clearid ++ "').click()"
 				},
-				#span{
-					class=[sigma_search_results_summary, ResultsSummaryClass],
-					text=wf:f(ResultsSummaryText, [Num, Search])
-				},
 				Body
 			],
 			wf:update(Resultsid, ResultsBody),
+			wf:update(BadgesId, Badges),
 			wf:wire(Clearid, #appear{}),
 			wf:wire(Resultsid, #slide_down{})
 	end.

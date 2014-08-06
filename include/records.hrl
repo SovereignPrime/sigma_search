@@ -13,3 +13,8 @@
 						x_button_text="X",
 						x_button_class=""
 		}).
+-record(sigma_search_badge, {?ELEMENT_BASE(element_sigma_search_badge),
+						delegate,
+                        type="",
+                        text=""
+		}).
