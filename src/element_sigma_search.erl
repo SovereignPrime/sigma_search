@@ -63,26 +63,28 @@ render_element(Rec = #sigma_search{
 	},
 
 	[
-		#panel{class=WrapperClass,body=[
+		#panel{class=WrapperClass, body=[
             #panel{
                id=BadgesId,
-               class=["sigma_search_badges", "pull-left"],
+               style="float:left;background:transparent;",
+               class=["sigma_search_badges", "add-on"],
                body=[]
               },
-			#textbox{
-				class=[sigma_search_textbox, TextboxClass],
-				postback=Postback,
-				delegate=?MODULE,
-				id=Textboxid,
-				placeholder=Placeholder,
-				actions=[
-					#event{type=keydown,postback=Postback,delegate=?MODULE}
-				]
-			},
+            #textbox{
+                class=[sigma_search_textbox, TextboxClass],
+                postback=Postback,
+                delegate=?MODULE,
+                id=Textboxid,
+                placeholder=Placeholder,
+                actions=[
+                    #event{type=keydown,postback=Postback,delegate=?MODULE}
+                ]
+            },
             #hidden{id=HiddenId,
                     text=""},
 			#button{
 				id=SearchButtonid,
+                style="float:right;",
 				class=[sigma_search_button, SearchButtonClass],
 				body=SearchButtonText,
 				postback=Postback,
