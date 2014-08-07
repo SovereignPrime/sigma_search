@@ -16,12 +16,14 @@ render_element(#sigma_search_badge{id=Id,
     #panel{id=Id,
            class=["sigma_search_badge", "badge"],
            body=[
-                 Type, ":", Text,
-                 #span{ class="", text="  x", actions=#event{
-                                                      type=click,
-                                                      postback={remove, Id},
-                                                      delegate=?MODULE
-                                                      }}
+                 #span{class=sigma_search_badge_type, text=Type}, 
+                ":",
+                #span{class=sigma_search_badge_text, text= Text},
+                #span{ class="", text="  x", actions=#event{
+                                                        type=click,
+                                                        postback={remove, Id},
+                                                        delegate=?MODULE
+                                                       }}
                  
                 ]}.
 

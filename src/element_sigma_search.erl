@@ -128,22 +128,16 @@ event(#postback{
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
         {Search, Hidden} ->
-            All = if Hidden /= "" ->
-                         LastSearch = string:sub_word(Search, string:words(Search)),
-                         Hiddens = string:tokens(Hidden, " "),
-                         [ Last | RHiddens ] = lists:reverse(Hiddens),
-                         Pos = string:str(LastSearch, Last),
-                         PosB = string:str(Last, LastSearch),
-                         if  Pos == 0, PosB == 0 ->
-                                 string:join(Hiddens ++ [LastSearch], " ");
-                             true ->
-                                 string:join(RHiddens ++ [LastSearch], " ")
-                         end;
-                     true ->
-                         Search
-                  end,
-            wf:set(HiddenId, All),
-            {Badges, Body} = Delegate:sigma_search_event(Tag, All),
+            Searches = string:tokens(Search, " "),
+            [ LSearch | RSearch ] = lists:reverse(Searches),
+            NHidden = string:join(string:tokens(Hidden, " ") ++ RSearch, " "),
+            if RSearch /= [] ->
+                   wf:set(Textboxid, LSearch);
+               true ->
+                   ok
+            end,
+            wf:set(HiddenId, NHidden),
+            {Badges, Body} = Delegate:sigma_search_event(Tag, NHidden ++ " " ++ LSearch),
 
 			ResultsBody = [
 				#button{
