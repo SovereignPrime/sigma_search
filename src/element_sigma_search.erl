@@ -81,6 +81,7 @@ render_element(Rec = #sigma_search{
                 ]
             },
             #hidden{id=HiddenId,
+                    class="wfid_sigma_search_hidden",
                     text=""},
 			#button{
 				id=SearchButtonid,
@@ -97,6 +98,8 @@ render_element(Rec = #sigma_search{
 				style="display:none",
 				click=[
 					#set{target=Textboxid, value=""},
+					#set{target=HiddenId, value=""},
+                    #script{script="$(obj('" ++ BadgesId ++ "')).empty()"},
 					#fade{target=Resultsid},
 					#fade{target=Clearid}
 				]
