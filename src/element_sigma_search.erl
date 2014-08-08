@@ -71,7 +71,7 @@ render_element(Rec = #sigma_search{
                body=[]
               },
             #textbox{
-                class=[sigma_search_textbox, TextboxClass],
+                class=[sigma_search_textbox, wfid_sigma_search_textbox, TextboxClass],
                 postback=Postback,
                 delegate=?MODULE,
                 id=Textboxid,
@@ -133,16 +133,16 @@ event(#postback{
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
         {Search, Hidden} ->
-            Searches = string:tokens(Search, " "),
-            [ LSearch | RSearch ] = lists:reverse(Searches),
-            NHidden = string:join(string:tokens(Hidden, " ") ++ RSearch, " "),
-            if RSearch /= [] ->
-                   wf:set(Textboxid, LSearch);
-               true ->
-                   ok
-            end,
-            wf:set(HiddenId, NHidden),
-            {Badges, Body} = Delegate:sigma_search_event(Tag, NHidden ++ " " ++ LSearch),
+            % Searches = string:tokens(Search, " "),
+            % [ LSearch | RSearch ] = lists:reverse(Searches),
+            % NHidden = string:join(string:tokens(Hidden, " ") ++ RSearch, " "),
+            % if RSearch /= [] ->
+            %        wf:set(Textboxid, LSearch);
+            %    true ->
+            %        ok
+            % end,
+            % wf:set(HiddenId, NHidden),
+            {Badges, Body} = Delegate:sigma_search_event(Tag, Hidden ++ " " ++ Search),
 
 			ResultsBody = [
 				#button{

@@ -13,7 +13,11 @@ reflect() -> record_info(fields, sigma_search_badge).
 render_element(#sigma_search_badge{id=Id,
                                    type=Type,
                                    text=Text}) ->
-    %wf:set(".sigma_search_textbox", ""),
+    Searches = string:tokens(wf:q(sigma_search_textbox), " "),
+    Texts = string:tokens(Text,  " "),
+    wf:set(sigma_search_textbox, Searches -- Texts ),
+    Hiddens = string:tokens(wf:q(sigma_search_hidden), " "), 
+    wf:set(sigma_search_hidden, string:join(lists:usort(Texts ++ Hiddens), " ")),
     #panel{id=Id,
            class=["sigma_search_badge", "badge"],
            body=[
