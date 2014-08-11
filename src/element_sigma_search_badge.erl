@@ -13,11 +13,16 @@ reflect() -> record_info(fields, sigma_search_badge).
 render_element(#sigma_search_badge{id=Id,
                                    type=Type,
                                    text=Text}) ->
-    Searches = string:tokens(wf:q(sigma_search_textbox), " "),
+    Search = wf:q(sigma_search_textbox),
+    Searches = string:tokens(Search, " "),
     Texts = string:tokens(Text,  " "),
-    wf:set(sigma_search_textbox, Searches -- Texts ),
-    Hiddens = string:tokens(wf:q(sigma_search_hidden), " "), 
-    wf:set(sigma_search_hidden, string:join(lists:usort(Texts ++ Hiddens), " ")),
+    Hiddens = wf:state_default(sigma_search_hidden, ""),
+    NHiddens = lists:usort(Hiddens ++ Texts),
+    NSearches = Searches -- NHiddens,
+
+    wf:state(sigma_search_hidden, NHiddens),
+    wf:set(sigma_search_textbox, string:join(NSearches, " ")),
+
     #panel{id=Id,
            class=["sigma_search_badge", "badge"],
            body=[
@@ -34,7 +39,6 @@ render_element(#sigma_search_badge{id=Id,
 
 event({remove, Id, Text}) -> % {{{1
     Data = wf:q(sigma_search_hidden),
-    wf:console_log({Data}),
     Terms = string:tokens(Data, " "),
     DTerms = string:tokens(Text, " "),
     wf:set(sigma_search_hidden, string:join(Terms -- DTerms, " ")),

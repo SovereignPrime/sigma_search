@@ -41,7 +41,6 @@ render_element(Rec = #sigma_search{
 		x_button_text=XButtonText
 		}) ->
 	Textboxid = wf:temp_id(),
-    HiddenId = wf:temp_id(),
 	Resultsid = wf:temp_id(),
     BadgesId = wf:temp_id(),
 	SearchButtonid = wf:temp_id(),
@@ -54,7 +53,6 @@ render_element(Rec = #sigma_search{
 		textboxid=Textboxid,
 		resultsid=Resultsid,
         badgesid=BadgesId,
-        hiddenid=HiddenId,
 		clearid=Clearid,
 		results_summary_text=ResultsSummaryText,
 		results_summary_class=ResultsSummaryClass,
@@ -80,9 +78,6 @@ render_element(Rec = #sigma_search{
                     #event{type=keydown,postback=Postback,delegate=?MODULE}
                 ]
             },
-            #hidden{id=HiddenId,
-                    class="wfid_sigma_search_hidden",
-                    text=""},
 			#button{
 				id=SearchButtonid,
                 style="float:right;",
@@ -98,11 +93,12 @@ render_element(Rec = #sigma_search{
 				style="display:none",
 				click=[
 					#set{target=Textboxid, value=""},
-					#set{target=HiddenId, value=""},
                     #script{script="$(obj('" ++ BadgesId ++ "')).empty()"},
 					#fade{target=Resultsid},
 					#fade{target=Clearid}
-				]
+				],
+                postback=search_clear,
+                delegate=?MODULE
 			}
 		]},
 		#panel{
@@ -125,7 +121,7 @@ event(#postback{
 		x_button_class=XButtonClass,
 		x_button_text=XButtonText
 	}) ->
-    case {wf:q(Textboxid), wf:q(HiddenId)} of
+    case {wf:q(Textboxid), string:join(wf:state_default(sigma_search_hidden, ""), " ")} of
         {"", ""} -> 
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
@@ -133,15 +129,6 @@ event(#postback{
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
         {Search, Hidden} ->
-            % Searches = string:tokens(Search, " "),
-            % [ LSearch | RSearch ] = lists:reverse(Searches),
-            % NHidden = string:join(string:tokens(Hidden, " ") ++ RSearch, " "),
-            % if RSearch /= [] ->
-            %        wf:set(Textboxid, LSearch);
-            %    true ->
-            %        ok
-            % end,
-            % wf:set(HiddenId, NHidden),
             {Badges, Body} = Delegate:sigma_search_event(Tag, Hidden ++ " " ++ Search),
 
 			ResultsBody = [
@@ -156,4 +143,6 @@ event(#postback{
 			wf:update(BadgesId, Badges),
 			wf:wire(Clearid, #appear{}),
 			wf:wire(Resultsid, #slide_down{})
-	end.
+	end;
+event(search_clear) ->
+    wf:state(sigma_search_hidden, "").
