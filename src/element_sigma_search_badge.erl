@@ -38,10 +38,10 @@ render_element(#sigma_search_badge{id=Id,
                 ]}.
 
 event({remove, Id, Text}) -> % {{{1
-    Data = wf:q(sigma_search_hidden),
-    Terms = string:tokens(Data, " "),
+    Terms = wf:state(sigma_search_hidden),
     DTerms = string:tokens(Text, " "),
-    wf:set(sigma_search_hidden, string:join(Terms -- DTerms, " ")),
+    wf:state(sigma_search_hidden, Terms -- DTerms),
+    wf:wire(#script{script="$('.sigma_search_textbox').keydown()"}),
     wf:remove(Id);
 event(E) -> % {{{1
     error_logger:error("Wrong event ~p in ~p~n", [E, ?MODULE]).
