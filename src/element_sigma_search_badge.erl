@@ -25,6 +25,7 @@ render_element(#sigma_search_badge{id=Id,
 
     #panel{id=Id,
            class=["sigma_search_badge", "badge"],
+           style="border-radius:3px;border-left:2px #fff solid;",
            body=[
                  #span{class=sigma_search_badge_type, text=Type}, 
                 ":",
