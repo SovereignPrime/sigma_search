@@ -121,7 +121,7 @@ event(#postback{
 		x_button_class=XButtonClass,
 		x_button_text=XButtonText
 	}) ->
-    case {wf:q(Textboxid), string:join(wf:state_default(sigma_search_hidden, ""), " ")} of
+    case {wf:q(Textboxid), wf:state_default(sigma_search_hidden, "")} of
         {"", ""} -> 
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
@@ -129,7 +129,7 @@ event(#postback{
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
         {Search, Hidden} ->
-            {Badges, Body} = Delegate:sigma_search_event(Tag, Hidden ++ " " ++ Search),
+            {Badges, Body} = Delegate:sigma_search_event(Tag, Hidden ++ [{"Term", Search}]),
 
 			ResultsBody = [
 				#button{
