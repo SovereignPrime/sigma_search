@@ -57,18 +57,19 @@ render_element(#sigma_search_badge{id=Id,
                  end,
                  #span{body=[" <i class='icon icon-caret-down icon-inverse'></i>", " | "]},
                  #span{style="vertical-align:middle;", class=sigma_search_badge_text, text= Text},
-                 #span{ class="",
-                        text="  x",
-                        actions=#event{
-                                   type=click,
-                                   postback={remove, B},
-                                   delegate=?MODULE
-                                  }}
+                 #span{class="",
+                       text="  x",
+                       actions=#event{
+                                  type=click,
+                                  postback={remove, B},
+                                  delegate=?MODULE
+                                 }}
 
                 ]}.
 
-event({dropdown, Badge, Type}) -> % {{{1
-    Id = Badge#sigma_search_badge.id,
+event({dropdown, #sigma_search_badge{id=Id, type=OType, text=Text}=Badge, Type}) -> % {{{1
+    Badges = wf:state('sigma_search_hidden'),
+    wf:state(sigma_search_hidden, Badges -- [{OType, Text}]),
     wf:replace(Id, Badge#sigma_search_badge{type=Type});
 event({remove, #sigma_search_badge{id=Id, type=Type, text=Text}}) -> % {{{1
     Terms = wf:state(sigma_search_hidden),
