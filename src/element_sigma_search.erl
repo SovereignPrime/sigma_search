@@ -124,7 +124,8 @@ event(#postback{
     case {wf:q(Textboxid), wf:session_default(sigma_search_hidden, "")} of
         {"", ""} -> 
 			wf:wire(Resultsid,#fade{}),
-			wf:wire(Clearid, #fade{});
+            Delegate:sigma_search_filter_clear(),
+            wf:wire(Clearid, #fade{});
         {Search, Hidden} ->
             {Badges, Body} = Delegate:sigma_search_event(Tag, Hidden ++ [{"Term", Search}]),
 
