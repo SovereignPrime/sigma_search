@@ -60,7 +60,6 @@ render_element(Rec = #sigma_search{
 		x_button_class=XButtonClass
 	},
 
-    wf:wire(#script{script="$('.sigma_search_textbox').keydown()"}),
 	[
 		#panel{class=WrapperClass, body=[
             #panel{
@@ -104,7 +103,7 @@ render_element(Rec = #sigma_search{
 		]},
 		#panel{
 			id=Resultsid,
-			class=[sigma_search_results, ResultsClass],
+			class=[sigma_search_results, wfid_sigma_search_results, ResultsClass],
 			style="display:none"
 		}
 	].
@@ -161,5 +160,5 @@ event({filter, #postback{
             Hidden = wf:session_default(sigma_search_hidden, ""),
             Delegate:sigma_search_filter_event(Tag, Hidden ++ [{"Term", Term}]);
 event({search_clear, Delegate}) ->
-    Delegate:filter_clear(),
+    Delegate:sigma_search_filter_clear(),
     wf:session(sigma_search_hidden, "").
