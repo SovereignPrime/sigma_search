@@ -19,8 +19,9 @@ render_element(#sigma_search_badge{id=Id,
     Texts = string:tokens(Text,  " "),
     Hiddens = wf:state_default(sigma_search_hidden, ""),
     NHiddens = lists:usort(Hiddens ++ [{Type, Text}]),
-    NSearches = Searches -- Texts,
-    wf:info("~p~n", [ NHiddens ]),
+    NSearches = Searches -- lists:flatmap(fun({_, T}) -> 
+                                              string:tokens(T, " ") 
+                                      end, NHiddens),
 
     wf:state(sigma_search_hidden, NHiddens),
     wf:set(sigma_search_textbox, string:join(NSearches, " ")),
