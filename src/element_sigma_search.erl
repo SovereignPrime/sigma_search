@@ -83,8 +83,8 @@ render_element(Rec = #sigma_search{
                 style="float:right;",
 				class=[sigma_search_button, SearchButtonClass],
 				body=SearchButtonText,
-				postback=Postback,
-				delegate=?MODULE
+				postback={filter, Postback},
+                delegate=?MODULE
 			},
 			#button{
 				id=Clearid,
@@ -142,5 +142,22 @@ event(#postback{
 			wf:wire(Clearid, #appear{}),
 			wf:wire(Resultsid, #slide_down{})
 	end;
+event({filter, #postback{
+		delegate=Delegate,
+		tag=Tag,
+		textboxid=Textboxid,
+		resultsid=Resultsid,
+        badgesid=BadgesId,
+        hiddenid=HiddenId,
+		clearid=Clearid,
+		results_summary_text=ResultsSummaryText,
+		results_summary_class=ResultsSummaryClass,
+		x_button_class=XButtonClass,
+		x_button_text=XButtonText
+	}}) ->
+			wf:wire(Resultsid,#fade{}),
+            Term = wf:q(Textboxid),
+            Hidden = wf:state_default(sigma_search_hidden, ""),
+            Delegate:sigma_search_filter_event(Tag, Hidden ++ [{"Term", Term}]);
 event(search_clear) ->
     wf:state(sigma_search_hidden, "").
