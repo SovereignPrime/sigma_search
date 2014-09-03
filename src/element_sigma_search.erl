@@ -137,6 +137,7 @@ event(#postback{
 				Body
 			],
 			wf:update(Resultsid, ResultsBody),
+            wf:state(sigma_search_hidden, ""),
 			wf:update(BadgesId, Badges),
 			wf:wire(Clearid, #appear{}),
 			wf:wire(Resultsid, #slide_down{})

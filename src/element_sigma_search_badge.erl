@@ -19,7 +19,8 @@ render_element(#sigma_search_badge{id=Id,
     Texts = string:tokens(Text,  " "),
     Hiddens = wf:state_default(sigma_search_hidden, ""),
     NHiddens = lists:usort(Hiddens ++ [{Type, Text}]),
-    NSearches = Searches -- Texts, %NHiddens,
+    NSearches = Searches -- Texts,
+    wf:info("~p~n", [ NHiddens ]),
 
     wf:state(sigma_search_hidden, NHiddens),
     wf:set(sigma_search_textbox, string:join(NSearches, " ")),
@@ -33,29 +34,31 @@ render_element(#sigma_search_badge{id=Id,
                                body=Type}; 
                      _ ->
                          #span{class=sigma_search_badge_type,
-                               body=#panel{class="btn-group",
-                                           body=[
-                                                 #link{class="btn dropdown-toggle btn-link btn-inverse",
-                                                       style="color: #fff;line-height:14px;padding:0;font-size:12px;",
-                                                       body=Type,
-                                                       data_fields=[{toggle, "dropdown"}],
-                                                       url="#",
-                                                       new=false},
-                                                 #list{numbered=false,
-                                                       class="dropdown-menu",
-                                                       body=lists:map(fun(D) ->
-                                                                      #listitem{class="",
-                                                                                body=[
-                                                                                      #link{text=D,
-                                                                                            postback={dropdown, B, D},
-                                                                                            delegate=?MODULE}
-                                                                                     ]}
-                                                                      end, Dropdown)
-                                                      }
-                                                ]}
-                              }
+                               body=[
+                                     #panel{class="btn-group",
+                                            body=[
+                                                  #link{class="btn dropdown-toggle btn-link btn-inverse",
+                                                        style="color: #fff;line-height:14px;padding:0;font-size:12px;",
+                                                        body=Type,
+                                                        data_fields=[{toggle, "dropdown"}],
+                                                        url="#",
+                                                        new=false},
+                                                  #list{numbered=false,
+                                                        class="dropdown-menu",
+                                                        body=lists:map(fun(D) ->
+                                                                               #listitem{class="",
+                                                                                         body=[
+                                                                                               #link{text=D,
+                                                                                                     postback={dropdown, B, D},
+                                                                                                     delegate=?MODULE}
+                                                                                              ]}
+                                                                       end, Dropdown)
+                                                       }
+                                                 ]},
+" <i class='icon icon-caret-down icon-inverse'></i>"
+                                    ]}
                  end,
-                 #span{body=[" <i class='icon icon-caret-down icon-inverse'></i>", " | "]},
+                 #span{body=[ " | "]},
                  #span{style="vertical-align:middle;", class=sigma_search_badge_text, text= Text},
                  #span{class="",
                        text="  x",
