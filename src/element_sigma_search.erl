@@ -60,6 +60,7 @@ render_element(Rec = #sigma_search{
 		x_button_class=XButtonClass
 	},
 
+    wf:wire(#script{script="$('.sigma_search_textbox').keydown()"}),
 	[
 		#panel{class=WrapperClass, body=[
             #panel{
@@ -97,7 +98,7 @@ render_element(Rec = #sigma_search{
 					#fade{target=Resultsid},
 					#fade{target=Clearid}
 				],
-                postback=search_clear,
+                postback={search_clear, Delegate},
                 delegate=?MODULE
 			}
 		]},
@@ -121,7 +122,7 @@ event(#postback{
 		x_button_class=XButtonClass,
 		x_button_text=XButtonText
 	}) ->
-    case {wf:q(Textboxid), wf:state_default(sigma_search_hidden, "")} of
+    case {wf:q(Textboxid), wf:session_default(sigma_search_hidden, "")} of
         {"", ""} -> 
 			wf:wire(Resultsid,#fade{}),
 			wf:wire(Clearid, #fade{});
@@ -137,7 +138,7 @@ event(#postback{
 				Body
 			],
 			wf:update(Resultsid, ResultsBody),
-            wf:state(sigma_search_hidden, ""),
+            wf:session(sigma_search_hidden, ""),
 			wf:update(BadgesId, Badges),
 			wf:wire(Clearid, #appear{}),
 			wf:wire(Resultsid, #slide_down{})
@@ -157,7 +158,8 @@ event({filter, #postback{
 	}}) ->
 			wf:wire(Resultsid,#fade{}),
             Term = wf:q(Textboxid),
-            Hidden = wf:state_default(sigma_search_hidden, ""),
+            Hidden = wf:session_default(sigma_search_hidden, ""),
             Delegate:sigma_search_filter_event(Tag, Hidden ++ [{"Term", Term}]);
-event(search_clear) ->
-    wf:state(sigma_search_hidden, "").
+event({search_clear, Delegate}) ->
+    Delegate:filter_clear(),
+    wf:session(sigma_search_hidden, "").
