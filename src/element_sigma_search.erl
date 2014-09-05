@@ -60,14 +60,18 @@ render_element(Rec = #sigma_search{
 		x_button_class=XButtonClass
 	},
 
-	[
-		#panel{class=WrapperClass, body=[
-            #panel{
-               id=BadgesId,
-               style="float:left;background:transparent;",
-               class=["sigma_search_badges", "add-on"],
-               body=[]
-              },
+    wf:wire(#event{type=timer,
+                   delay=200,
+                   actions=length_adjust(".wfid_" ++ BadgesId, ".wfid_" ++ SearchButtonid, ".wfid_" ++ Clearid)}),
+    [
+		#panel{class=["sigma_search", WrapperClass],
+               body=[
+                     #panel{
+                        id=BadgesId,
+                        style="float:left;background:transparent;",
+                        class=["sigma_search_badges", "add-on"],
+                        body=[]
+                       },
             #textbox{
                 class=[sigma_search_textbox, wfid_sigma_search_textbox, TextboxClass],
                 postback=Postback,
@@ -141,6 +145,7 @@ event(#postback{
             wf:session(sigma_search_hidden, ""),
 			wf:update(BadgesId, Badges),
 			wf:wire(Clearid, #appear{}),
+            wf:wire(length_adjust(".wfid_" ++ BadgesId, ".sigma_search_button", ".wfid_" ++ Clearid)),
 			wf:wire(Resultsid, #slide_down{})
 	end;
 event({filter, #postback{
@@ -161,5 +166,16 @@ event({filter, #postback{
             Hidden = wf:session_default(sigma_search_hidden, ""),
             Delegate:sigma_search_filter_event(Tag, Hidden ++ [{"Term", Term}]);
 event({search_clear, Delegate}) ->
+    wf:wire(length_adjust(".sigma_search_badges", ".sigma_search_button", ".sigma_search_clear")),
     Delegate:sigma_search_filter_clear(),
     wf:session(sigma_search_hidden, "").
+
+length_adjust(BadgesId, SearchButtonid, Clearid) ->
+    #script{
+       script="$('.sigma_search_textbox').width($('.sigma_search').innerWidth() - $('"
+       ++ BadgesId 
+       ++ "').outerWidth() - $('" 
+       ++ SearchButtonid 
+       ++ "').outerWidth() - $('" 
+       ++ Clearid 
+       ++ "').outerWidth() - $('.sigma_search_x_button').outerWidth() - 10);"}.
