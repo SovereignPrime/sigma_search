@@ -40,7 +40,10 @@ render_element(#sigma_search_badge{id=Id,
                                             body=[
                                                   #link{class="btn dropdown-toggle btn-link btn-inverse",
                                                         style="color: #fff;line-height:14px;padding:0;font-size:12px;",
-                                                        body=Type,
+                                                        body=[
+                                                              Type,
+                                                              " <i class='icon icon-caret-down icon-inverse'></i>"
+                                                             ],
                                                         data_fields=[{toggle, "dropdown"}],
                                                         url="#",
                                                         new=false},
@@ -55,8 +58,7 @@ render_element(#sigma_search_badge{id=Id,
                                                                                               ]}
                                                                        end, Dropdown)
                                                        }
-                                                 ]},
-" <i class='icon icon-caret-down icon-inverse'></i>"
+                                                 ]}
                                     ]}
                  end,
                  #span{body=[ " | "]},
