@@ -74,7 +74,7 @@ render_element(Rec = #sigma_search{
                      #panel{
                         id=BadgesId,
                         style="float:left;background:transparent;",
-                        class=["sigma_search_badges", "add-on"],
+                        class=["wfid_sigma_search_badges", "sigma_search_badges", "add-on"],
                         body=[]
                        },
             #textbox{
