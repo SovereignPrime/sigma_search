@@ -130,7 +130,7 @@ event(#postback{
 		x_button_class=XButtonClass,
 		x_button_text=XButtonText
 	}) ->
-    case {wf:q(Textboxid), wf:session_default(sigma_search_hidden, "")} of
+    case {string:strip(wf:q(Textboxid)), wf:session_default(sigma_search_hidden, "")} of
         {"", ""} -> 
 			wf:wire(Resultsid,#fade{}),
             Delegate:sigma_search_filter_clear(),
@@ -150,7 +150,9 @@ event(#postback{
             wf:session(sigma_search_hidden, ""),
 			wf:update(BadgesId, Badges),
 			wf:wire(Clearid, #appear{}),
-            wf:wire(#script{script=length_adjust(".wfid_" ++ BadgesId, ".sigma_search_button", ".wfid_" ++ Clearid)}),
+            wf:wire(#script{script=length_adjust(".wfid_" ++ BadgesId,
+                                                 ".sigma_search_button",
+                                                 ".wfid_" ++ Clearid)}),
 			wf:wire(Resultsid, #slide_down{})
 	end;
 event({filter, #postback{
