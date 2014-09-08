@@ -173,7 +173,9 @@ event({filter, #postback{
             Hidden = wf:session_default(sigma_search_hidden, ""),
             Delegate:sigma_search_filter_event(Tag, Hidden ++ [{"Term", Term}]);
 event({search_clear, Delegate}) ->
-    wf:wire(#script{script=length_adjust(".sigma_search_badges", ".sigma_search_button", ".sigma_search_clear")}),
+    wf:wire(#script{script=length_adjust(".sigma_search_badges",
+                                         ".sigma_search_button",
+                                         ".sigma_search_clear")}),
     Delegate:sigma_search_filter_clear(),
     wf:session(sigma_search_hidden, "").
 
