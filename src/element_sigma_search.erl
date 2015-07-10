@@ -68,6 +68,11 @@ render_element(Rec = #sigma_search{
     wf:wire(#event{type=timer,
                    delay=200,
                    actions=#script{script=length_adjust(".wfid_" ++ BadgesId, ".wfid_" ++ SearchButtonid, ".wfid_" ++ Clearid)}}),
+    wf:session(sigma_search_result_show, false),
+    wf:wire(#event{type=timer,
+                   delay=200,
+                   postback=Postback,
+                   delegate=?MODULE}),
     [
 		#panel{class=["sigma_search", WrapperClass],
                body=[
@@ -153,7 +158,13 @@ event(#postback{
             wf:wire(#script{script=length_adjust(".wfid_" ++ BadgesId,
                                                  ".sigma_search_button",
                                                  ".wfid_" ++ Clearid)}),
-			wf:wire(Resultsid, #slide_down{})
+            case  wf:session_default(sigma_search_result_show, true) of
+                true ->
+                    wf:session(sigma_search_result_show, true),
+                    wf:wire(Resultsid, #slide_down{});
+                _ ->
+                    wf:session(sigma_search_result_show, true)
+            end
 	end;
 event({filter, #postback{
 		delegate=Delegate,
