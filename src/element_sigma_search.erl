@@ -89,7 +89,9 @@ render_element(Rec = #sigma_search{
                 id=Textboxid,
                 placeholder=Placeholder,
                 actions=[
-                    #event{type=keydown,postback=Postback,delegate=?MODULE}
+                    #event{type=keydown,
+                           postback=Postback,
+                           delegate=?MODULE}
                 ]
             },
 			#button{
@@ -111,7 +113,7 @@ render_element(Rec = #sigma_search{
 					#fade{target=Resultsid},
 					#fade{target=Clearid}
 				],
-                postback={search_clear, Delegate},
+                postback={search_clear, Postback, Delegate},
                 delegate=?MODULE
 			}
 		]},
@@ -135,14 +137,23 @@ event(#postback{
 		x_button_class=XButtonClass,
 		x_button_text=XButtonText
 	}) ->
-    case {string:strip(wf:q(Textboxid)), wf:session_default(sigma_search_hidden, "")} of
+    case {string:strip(wf:q(Textboxid)), wf:session_default(Textboxid, "")} of
         {"", ""} -> 
 			wf:wire(Resultsid,#fade{}),
             Delegate:sigma_search_filter_clear(),
             wf:wire(Clearid, #fade{});
         {Search, Hidden} ->
-            {Badges, Body} = Delegate:sigma_search_event(Tag, Hidden ++ [{"Term", Search}]),
+            {TBadges, Body} = Delegate:sigma_search_event(Tag, Hidden ++ [{"Term", Search}]),
 
+            Badges = lists:map(fun({Type, Text, Variants}) ->
+                                       #sigma_search_badge{
+                                          textboxid=Textboxid,
+                                          type=Type,
+                                          text=Text,
+                                          dropdown=Variants -- [Type]
+                                         }
+                               end,
+                               TBadges),
 			ResultsBody = [
 				#button{
 					text=XButtonText,
@@ -152,7 +163,7 @@ event(#postback{
 				Body
 			],
 			wf:update(Resultsid, ResultsBody),
-            wf:session(sigma_search_hidden, ""),
+            wf:session(Textboxid, ""),
 			wf:update(BadgesId, Badges),
 			wf:wire(Clearid, #appear{}),
             wf:wire(#script{script=length_adjust(".wfid_" ++ BadgesId,
@@ -181,14 +192,14 @@ event({filter, #postback{
 	}}) ->
 			wf:wire(Resultsid,#fade{}),
             Term = wf:q(Textboxid),
-            Hidden = wf:session_default(sigma_search_hidden, ""),
+            Hidden = wf:session_default(Textboxid, ""),
             Delegate:sigma_search_filter_event(Tag, Hidden ++ [{"Term", Term}]);
-event({search_clear, Delegate}) ->
+event({search_clear, #postback{textboxid=Textboxid}, Delegate}) ->
     wf:wire(#script{script=length_adjust(".sigma_search_badges",
                                          ".sigma_search_button",
                                          ".sigma_search_clear")}),
     Delegate:sigma_search_filter_clear(),
-    wf:session(sigma_search_hidden, "").
+    wf:session(Textboxid, "").
 
 length_adjust(BadgesId, SearchButtonid, Clearid) ->
     "$('.sigma_search_textbox').width($('.sigma_search').innerWidth() - $('"

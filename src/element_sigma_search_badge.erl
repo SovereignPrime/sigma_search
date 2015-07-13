@@ -11,20 +11,21 @@
 reflect() -> record_info(fields, sigma_search_badge).
 
 render_element(#sigma_search_badge{id=Id,
+                                   textboxid=Textboxid,
                                    type=Type,
                                    dropdown=Dropdown,
                                    text=Text}=B) ->  % {{{1
-    Search = wf:q(sigma_search_textbox),
+    Search = wf:q(Textboxid),
     Searches = string:tokens(Search, " "),
     Texts = string:tokens(Text,  " "),
-    Hiddens = wf:session_default(sigma_search_hidden, ""),
+    Hiddens = wf:session_default(Textboxid, ""),
     NHiddens = lists:usort(Hiddens ++ [{Type, Text}]),
     NSearches = Searches -- lists:flatmap(fun({_, T}) -> 
                                               string:tokens(T, " ") 
                                       end, NHiddens),
 
-    wf:session(sigma_search_hidden, NHiddens),
-    wf:set(sigma_search_textbox, string:join(NSearches, " ")),
+    wf:session(Textboxid, NHiddens),
+    wf:set(Textboxid, string:join(NSearches, " ")),
 
     #panel{id=Id,
            class=["sigma_search_badge", "badge"],
@@ -56,13 +57,16 @@ render_element(#sigma_search_badge{id=Id,
                                                                                                      postback={dropdown, B, D},
                                                                                                      delegate=?MODULE}
                                                                                               ]}
-                                                                       end, Dropdown)
+                                                                       end,
+                                                                       Dropdown)
                                                        }
                                                  ]}
                                     ]}
                  end,
                  #span{body=[ " | "]},
-                 #span{style="vertical-align:middle;", class=sigma_search_badge_text, text= Text},
+                 #span{style="vertical-align:middle;",
+                       class=sigma_search_badge_text,
+                       text= Text},
                  #span{class="",
                        text="  x",
                        actions=#event{
@@ -73,14 +77,22 @@ render_element(#sigma_search_badge{id=Id,
 
                 ]}.
 
-event({dropdown, #sigma_search_badge{id=Id, type=OType, text=Text}=Badge, Type}) -> % {{{1
-    Badges = wf:session('sigma_search_hidden'),
-    wf:session(sigma_search_hidden, Badges -- [{OType, Text}] ++ [{Type, Text}]),
+event({dropdown,
+       #sigma_search_badge{id=Id,
+                           textboxid=Textboxid,
+                           type=OType,
+                           text=Text}=Badge,
+       Type}) -> % {{{1
+    Badges = wf:session(Textboxid),
+    wf:session(Textboxid, Badges -- [{OType, Text}] ++ [{Type, Text}]),
     wf:replace(Id, Badge#sigma_search_badge{type=Type}),
     wf:wire(#script{script="$('.sigma_search_textbox').keydown()"});
-event({remove, #sigma_search_badge{id=Id, type=Type, text=Text}}) -> % {{{1
-    Terms = wf:session(sigma_search_hidden),
-    wf:session(sigma_search_hidden, Terms -- [ {Type, Text} ]),
+event({remove, #sigma_search_badge{id=Id,
+                                   textboxid=Textboxid,
+                                   type=Type,
+                                   text=Text}}) -> % {{{1
+    Terms = wf:session(Textboxid),
+    wf:session(Textboxid, Terms -- [ {Type, Text} ]),
     wf:wire(#script{script="$('.sigma_search_textbox').keydown()"}),
     wf:remove(Id);
 event(E) -> % {{{1
