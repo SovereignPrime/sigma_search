@@ -8,19 +8,22 @@
 	event/1
 ]).
 
--record(postback, {
-		results_summary_text,
-		results_summary_class,
-		textboxid, 
-		clearid,
-		resultsid,
-        badgesid,
-        hiddenid,
-		tag,
-		delegate,
-		x_button_text,
-		x_button_class
-	}).
+-record(postback,
+        {
+         id,
+         results_summary_text,
+         results_summary_class,
+         textboxid, 
+         clearid,
+         resultsid,
+         badgesid,
+         hiddenid,
+         search_button_id,
+         tag,
+         delegate,
+         x_button_text,
+         x_button_class
+        }).
 
 reflect() -> record_info(fields, sigma_search).
 
@@ -40,6 +43,7 @@ render_element(Rec = #sigma_search{
 		x_button_class=XButtonClass,
 		x_button_text=XButtonText
 		}) ->
+	MyId = wf:temp_id(),
 	Textboxid = wf:temp_id(),
 	Resultsid = wf:temp_id(),
     BadgesId = wf:temp_id(),
@@ -48,94 +52,110 @@ render_element(Rec = #sigma_search{
 	Delegate = wf:coalesce([Rec#sigma_search.delegate, wf:page_module()]),
 	
 	Postback = #postback{
-		delegate=Delegate,
-		tag=Tag,
-		textboxid=Textboxid,
-		resultsid=Resultsid,
-        badgesid=BadgesId,
-		clearid=Clearid,
-		results_summary_text=ResultsSummaryText,
-		results_summary_class=ResultsSummaryClass,
-		x_button_text=XButtonText,
-		x_button_class=XButtonClass
-	},
+                  id=MyId,
+                  delegate=Delegate,
+                  tag=Tag,
+                  textboxid=Textboxid,
+                  resultsid=Resultsid,
+                  badgesid=BadgesId,
+                  clearid=Clearid,
+                  search_button_id=SearchButtonid,
+                  results_summary_text=ResultsSummaryText,
+                  results_summary_class=ResultsSummaryClass,
+                  x_button_text=XButtonText,
+                  x_button_class=XButtonClass
+                 },
 
     wf:wire(#script{script="$(window).resize(function() {" ++
-                    length_adjust(".wfid_" ++ BadgesId,
-                                  ".wfid_" ++ SearchButtonid,
-                                  ".wfid_" ++ Clearid) ++
+                    length_adjust(MyId,
+                                  Textboxid, 
+                                  Resultsid,
+                                  BadgesId,
+                                  SearchButtonid,
+                                  Clearid
+                                 ) ++
     "})"}),
     wf:wire(#event{type=timer,
                    delay=200,
-                   actions=#script{script=length_adjust(".wfid_" ++ BadgesId, ".wfid_" ++ SearchButtonid, ".wfid_" ++ Clearid)}}),
+                   actions=#script{script=length_adjust(MyId,
+                                                        Textboxid, 
+                                                        Resultsid,
+                                                        BadgesId,
+                                                        SearchButtonid,
+                                                        Clearid
+                                                       )}}),
     wf:session(sigma_search_result_show, false),
     wf:wire(#event{type=timer,
                    delay=200,
                    postback=Postback,
                    delegate=?MODULE}),
     [
-		#panel{class=["sigma_search", WrapperClass],
-               body=[
-                     #panel{
-                        id=BadgesId,
-                        style="float:left;background:transparent;",
-                        class=["wfid_sigma_search_badges", "sigma_search_badges", "add-on"],
-                        body=[]
-                       },
-            #textbox{
-                class=[sigma_search_textbox, wfid_sigma_search_textbox, TextboxClass],
-                postback=Postback,
-                delegate=?MODULE,
-                id=Textboxid,
-                placeholder=Placeholder,
-                actions=[
-                    #event{type=keydown,
-                           postback=Postback,
-                           delegate=?MODULE}
-                ]
-            },
-			#button{
-				id=SearchButtonid,
-                style="float:right;",
-				class=[sigma_search_button, SearchButtonClass],
-				body=SearchButtonText,
-				postback={filter, Postback},
-                delegate=?MODULE
-			},
-			#button{
-				id=Clearid,
-				body=ClearText,
-				class=[sigma_search_clear, ClearClass],
-				style="display:none",
-				click=[
-					#set{target=Textboxid, value=""},
-                    #script{script="$(obj('" ++ BadgesId ++ "')).empty()"},
-					#fade{target=Resultsid},
-					#fade{target=Clearid}
-				],
-                postback={search_clear, Postback, Delegate},
-                delegate=?MODULE
-			}
-		]},
-		#panel{
-			id=Resultsid,
-			class=[sigma_search_results, wfid_sigma_search_results, ResultsClass],
-			style="display:none"
-		}
-	].
+     #panel{
+        id=MyId,
+        class=["sigma_search", WrapperClass],
+        body=[
+              #panel{
+                 id=BadgesId,
+                 style="float:left;background:transparent;",
+                 class=["wfid_sigma_search_badges", "sigma_search_badges", "add-on"],
+                 body=[]
+                },
+              #textbox{
+                 class=[sigma_search_textbox, wfid_sigma_search_textbox, TextboxClass],
+                 postback=Postback,
+                 delegate=?MODULE,
+                 id=Textboxid,
+                 placeholder=Placeholder,
+                 actions=[
+                          #event{type=keydown,
+                                 postback=Postback,
+                                 delegate=?MODULE}
+                         ]
+                },
+              #button{
+                 id=SearchButtonid,
+                 style="float:right;",
+                 class=[sigma_search_button, SearchButtonClass],
+                 body=SearchButtonText,
+                 postback={filter, Postback},
+                 delegate=?MODULE
+                },
+              #button{
+                 id=Clearid,
+                 body=ClearText,
+                 class=[sigma_search_clear, ClearClass],
+                 style="display:none",
+                 click=[
+                        #set{target=Textboxid, value=""},
+                        #script{script="$(obj('" ++ BadgesId ++ "')).empty()"},
+                        #fade{target=Resultsid},
+                        #fade{target=Clearid}
+                       ],
+                 postback={search_clear, Postback, Delegate},
+                 delegate=?MODULE
+                }
+             ]},
+     #panel{
+        id=Resultsid,
+        class=[sigma_search_results, wfid_sigma_search_results, ResultsClass],
+        style="display:none"
+       }
+    ].
 
 event(#postback{
-		delegate=Delegate,
-		tag=Tag,
-		textboxid=Textboxid,
-		resultsid=Resultsid,
-        badgesid=BadgesId,
-        hiddenid=HiddenId,
-		clearid=Clearid,
-		results_summary_text=ResultsSummaryText,
-		results_summary_class=ResultsSummaryClass,
-		x_button_class=XButtonClass,
-		x_button_text=XButtonText
+         id=MyId,
+         delegate=Delegate,
+         tag=Tag,
+         textboxid=Textboxid,
+         resultsid=Resultsid,
+         badgesid=BadgesId,
+         hiddenid=HiddenId,
+         clearid=Clearid,
+         search_button_id=SearchButtonid,
+         results_summary_text=ResultsSummaryText,
+         results_summary_class=ResultsSummaryClass,
+         x_button_class=XButtonClass,
+         x_button_text=XButtonText
 	}) ->
     case {string:strip(wf:q(Textboxid)), wf:session_default(Textboxid, "")} of
         {"", ""} -> 
@@ -166,9 +186,13 @@ event(#postback{
             wf:session(Textboxid, ""),
 			wf:update(BadgesId, Badges),
 			wf:wire(Clearid, #appear{}),
-            wf:wire(#script{script=length_adjust(".wfid_" ++ BadgesId,
-                                                 ".sigma_search_button",
-                                                 ".wfid_" ++ Clearid)}),
+            wf:wire(#script{script=length_adjust(MyId,
+                                                 Textboxid, 
+                                                 Resultsid,
+                                                 BadgesId,
+                                                 SearchButtonid,
+                                                 Clearid
+                                                )}),
             case  wf:session_default(sigma_search_result_show, true) of
                 true ->
                     wf:session(sigma_search_result_show, true),
@@ -178,36 +202,54 @@ event(#postback{
             end
 	end;
 event({filter, #postback{
-		delegate=Delegate,
-		tag=Tag,
-		textboxid=Textboxid,
-		resultsid=Resultsid,
-        badgesid=BadgesId,
-        hiddenid=HiddenId,
-		clearid=Clearid,
-		results_summary_text=ResultsSummaryText,
-		results_summary_class=ResultsSummaryClass,
-		x_button_class=XButtonClass,
-		x_button_text=XButtonText
-	}}) ->
+                  id=MyId,
+                  delegate=Delegate,
+                  tag=Tag,
+                  textboxid=Textboxid,
+                  resultsid=Resultsid,
+                  badgesid=BadgesId,
+                  hiddenid=HiddenId,
+                  clearid=Clearid,
+                  results_summary_text=ResultsSummaryText,
+                  results_summary_class=ResultsSummaryClass,
+                  x_button_class=XButtonClass,
+                  x_button_text=XButtonText
+                 }}) ->
 			wf:wire(Resultsid,#fade{}),
             Term = wf:q(Textboxid),
             Hidden = wf:session_default(Textboxid, ""),
             Delegate:sigma_search_filter_event(Tag, Hidden ++ [{"Term", Term}]);
-event({search_clear, #postback{textboxid=Textboxid}, Delegate}) ->
-    wf:wire(#script{script=length_adjust(".sigma_search_badges",
-                                         ".sigma_search_button",
-                                         ".sigma_search_clear")}),
+event({search_clear, #postback{
+                        id=MyId,
+                        textboxid=Textboxid,
+                        resultsid=Resultsid,
+                        badgesid=BadgesId,
+                        hiddenid=HiddenId,
+                        search_button_id=SearchButtonid,
+                        clearid=Clearid
+                       }, Delegate}) ->
+    wf:wire(#script{script=length_adjust(MyId,
+                                         Textboxid, 
+                                         Resultsid,
+                                         BadgesId,
+                                         SearchButtonid,
+                                         Clearid
+                                         )}),
     Delegate:sigma_search_filter_clear(),
     wf:session(Textboxid, "").
 
-length_adjust(BadgesId, SearchButtonid, Clearid) ->
-    "$('.sigma_search_textbox').width($('.sigma_search').innerWidth() - $('"
+length_adjust(Id, Textboxid, Resultsid, BadgesId, SearchButtonid, Clearid) ->
+    "$(obj('" ++ Textboxid 
+       ++ "')).width($(obj('" 
+       ++ Id 
+       ++ "')).innerWidth() - $(obj('"
        ++ BadgesId 
-       ++ "').outerWidth() - $('" 
+       ++ "')).outerWidth() - $(obj('" 
        ++ SearchButtonid 
-       ++ "').outerWidth() - $('" 
+       ++ "')).outerWidth() - $(obj('" 
        ++ Clearid 
-       ++ "').outerWidth() - $('.sigma_search_x_button').outerWidth() - 10);
-        $('.sigma_search_results').width($('.sigma_search').innerWidth() - 7);
+       ++ "')).outerWidth() - $('.sigma_search_x_button').outerWidth() - 10);
+        $(obj('" ++ Resultsid ++ "')).width($(obj('" 
+       ++ Id 
+       ++ "')).innerWidth() - 7);
        ".
