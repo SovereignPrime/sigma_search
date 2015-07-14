@@ -37,6 +37,7 @@ render_element(Rec = #sigma_search{
 		clear_button_class=ClearClass,
 		clear_button_text=ClearText,
 		tag=Tag,
+        badges=Badges,
 		class=WrapperClass,
 		results_summary_text=ResultsSummaryText,
 		results_summary_class=ResultsSummaryClass,
@@ -98,7 +99,12 @@ render_element(Rec = #sigma_search{
                  id=BadgesId,
                  style="float:left;background:transparent;",
                  class=["wfid_sigma_search_badges", "sigma_search_badges", "add-on"],
-                 body=[]
+                 body=lists:map(fun(B) ->
+                                        B#sigma_search_badge{
+                                          textboxid=Textboxid
+                                         }
+                                end,
+                                Badges)
                 },
               #textbox{
                  class=[sigma_search_textbox, wfid_sigma_search_textbox, TextboxClass],
@@ -165,12 +171,9 @@ event(#postback{
         {Search, Hidden} ->
             {TBadges, Body} = Delegate:sigma_search_event(Tag, Hidden ++ [{"Term", Search}]),
 
-            Badges = lists:map(fun({Type, Text, Variants}) ->
-                                       #sigma_search_badge{
-                                          textboxid=Textboxid,
-                                          type=Type,
-                                          text=Text,
-                                          dropdown=Variants -- [Type]
+            Badges = lists:map(fun(B) ->
+                                       B#sigma_search_badge{
+                                          textboxid=Textboxid
                                          }
                                end,
                                TBadges),

@@ -2,6 +2,7 @@
 						delegate,
 						placeholder="",
 						tag,
+                        badges=[],
 						textbox_class="",
 						search_button_class="",
 						search_button_text="Search",
