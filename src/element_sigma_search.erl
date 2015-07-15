@@ -18,6 +18,7 @@
          resultsid,
          badgesid,
          hiddenid,
+         show_results=true,
          search_button_id,
          tag,
          delegate,
@@ -85,10 +86,9 @@ render_element(Rec = #sigma_search{
                                                         SearchButtonid,
                                                         Clearid
                                                        )}}),
-    wf:session(sigma_search_result_show, false),
     wf:wire(#event{type=timer,
                    delay=200,
-                   postback=Postback,
+                   postback=Postback#postback{show_results=false},
                    delegate=?MODULE}),
     [
      #panel{
@@ -123,7 +123,7 @@ render_element(Rec = #sigma_search{
                  style="float:right;",
                  class=[sigma_search_button, SearchButtonClass],
                  body=SearchButtonText,
-                 postback={filter, Postback},
+                 postback={filter, Postback#postback{show_results=false},
                  delegate=?MODULE
                 },
               #button{
@@ -157,6 +157,7 @@ event(#postback{
          badgesid=BadgesId,
          hiddenid=HiddenId,
          clearid=Clearid,
+         show_results=ShowResult,
          search_button_id=SearchButtonid,
          results_summary_text=ResultsSummaryText,
          results_summary_class=ResultsSummaryClass,
@@ -196,12 +197,11 @@ event(#postback{
                                                  SearchButtonid,
                                                  Clearid
                                                 )}),
-            case  wf:session_default(sigma_search_result_show, true) of
+            case ShowResult of
                 true ->
-                    wf:session(sigma_search_result_show, true),
                     wf:wire(Resultsid, #slide_down{});
                 _ ->
-                    wf:session(sigma_search_result_show, true)
+                    ok
             end
 	end;
 event({filter, #postback{

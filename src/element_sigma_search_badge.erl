@@ -10,26 +10,31 @@
 
 reflect() -> record_info(fields, sigma_search_badge).
 
-render_element(#sigma_search_badge{id=Id,
+render_element(#sigma_search_badge{id=Id,  % {{{1
                                    textboxid=Textboxid,
                                    type=Type,
                                    dropdown=Dropdown,
-                                   text=Text}=B) ->  % {{{1
-    Search = wf:q(Textboxid),
-    Searches = string:tokens(Search, " "),
+                                   text=Text}=B) ->
+    Searches = case wf:q(Textboxid) of
+                   undefined ->
+                       [];
+                   Search ->
+                       string:tokens(Search, " ")
+               end,
     Texts = string:tokens(Text,  " "),
     Hiddens = wf:session_default(Textboxid, ""),
     NHiddens = lists:usort(Hiddens ++ [{Type, Text}]),
     NSearches = Searches -- lists:flatmap(fun({_, T}) -> 
                                               string:tokens(T, " ") 
-                                      end, NHiddens),
+                                          end,
+                                          NHiddens),
 
     wf:session(Textboxid, NHiddens),
     wf:set(Textboxid, string:join(NSearches, " ")),
 
     #panel{id=Id,
            class=["sigma_search_badge", "badge"],
-           style="border-radius:3px;border-left:2px #fff solid;",
+           style="border-radius:3px;border-left:2px #fff solid; float:left;",
            body=[case Dropdown of
                      [] ->
                          #span{class=sigma_search_badge_type,
@@ -77,20 +82,21 @@ render_element(#sigma_search_badge{id=Id,
 
                 ]}.
 
-event({dropdown,
+event({dropdown, % {{{1
        #sigma_search_badge{id=Id,
                            textboxid=Textboxid,
                            type=OType,
                            text=Text}=Badge,
-       Type}) -> % {{{1
+       Type}) ->
     Badges = wf:session(Textboxid),
     wf:session(Textboxid, Badges -- [{OType, Text}] ++ [{Type, Text}]),
     wf:replace(Id, Badge#sigma_search_badge{type=Type}),
     wf:wire(#script{script="$('.sigma_search_textbox').keydown()"});
-event({remove, #sigma_search_badge{id=Id,
+
+event({remove, #sigma_search_badge{id=Id, % {{{1
                                    textboxid=Textboxid,
                                    type=Type,
-                                   text=Text}}) -> % {{{1
+                                   text=Text}}) ->
     Terms = wf:session(Textboxid),
     wf:session(Textboxid, Terms -- [ {Type, Text} ]),
     wf:wire(#script{script="$('.sigma_search_textbox').keydown()"}),
