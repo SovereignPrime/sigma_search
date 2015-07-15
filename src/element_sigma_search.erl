@@ -30,22 +30,23 @@ reflect() -> record_info(fields, sigma_search).
 
 
 render_element(Rec = #sigma_search{
-		placeholder=Placeholder,
-		textbox_class=TextboxClass,
-		results_class=ResultsClass,
-		search_button_class=SearchButtonClass,
-		search_button_text=SearchButtonText,
-		clear_button_class=ClearClass,
-		clear_button_text=ClearText,
-		tag=Tag,
-        badges=Badges,
-		class=WrapperClass,
-		results_summary_text=ResultsSummaryText,
-		results_summary_class=ResultsSummaryClass,
-		x_button_class=XButtonClass,
-		x_button_text=XButtonText
-		}) ->
-	MyId = wf:temp_id(),
+                        id=Id,
+                        placeholder=Placeholder,
+                        textbox_class=TextboxClass,
+                        results_class=ResultsClass,
+                        search_button_class=SearchButtonClass,
+                        search_button_text=SearchButtonText,
+                        clear_button_class=ClearClass,
+                        clear_button_text=ClearText,
+                        tag=Tag,
+                        badges=Badges,
+                        class=WrapperClass,
+                        results_summary_text=ResultsSummaryText,
+                        results_summary_class=ResultsSummaryClass,
+                        x_button_class=XButtonClass,
+                        x_button_text=XButtonText
+                       }) ->
+	MyId = wf:coalesce([Id, wf:temp_id()]),
 	Textboxid = wf:temp_id(),
 	Resultsid = wf:temp_id(),
     BadgesId = wf:temp_id(),
@@ -123,7 +124,7 @@ render_element(Rec = #sigma_search{
                  style="float:right;",
                  class=[sigma_search_button, SearchButtonClass],
                  body=SearchButtonText,
-                 postback={filter, Postback#postback{show_results=false},
+                 postback={filter, Postback#postback{show_results=false}},
                  delegate=?MODULE
                 },
               #button{
