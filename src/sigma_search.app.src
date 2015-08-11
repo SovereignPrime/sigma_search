@@ -1,4 +1,4 @@
-%% vim ts=2 sw=2 et ft=erlang
+%% vim: ts=2 sw=2 et ft=erlang
 {application, sigma_search,
  [
   {description, "A Simple Nitrogen Search Form with Formatted Results"},
@@ -6,7 +6,8 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  nitrogen_core
                  ]},
   {env, []}
  ]}.
