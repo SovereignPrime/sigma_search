@@ -12,25 +12,20 @@ reflect() -> record_info(fields, sigma_search_badge).
 
 render_element(#sigma_search_badge{id=Id,  % {{{1
                                    textboxid=Textboxid,
+                                   type="Term",
+                                   text=Text}=B) ->
+    wf:info("Term ~p", [Text]),
+    wf:set(Textboxid, Text),
+    [];
+render_element(#sigma_search_badge{id=Id,  % {{{1
+                                   textboxid=Textboxid,
                                    type=Type,
                                    dropdown=Dropdown,
                                    text=Text}=B) ->
-    Searches = case wf:q(Textboxid) of
-                   undefined ->
-                       [];
-                   Search ->
-                       string:tokens(Search, " ")
-               end,
-    Texts = string:tokens(Text,  " "),
     Hiddens = wf:session_default(Textboxid, ""),
     NHiddens = lists:usort(Hiddens ++ [{Type, Text}]),
-    NSearches = Searches -- lists:flatmap(fun({_, T}) -> 
-                                              string:tokens(T, " ") 
-                                          end,
-                                          NHiddens),
 
     wf:session(Textboxid, NHiddens),
-    wf:set(Textboxid, string:join(NSearches, " ")),
 
     #panel{id=Id,
            class=["sigma_search_badge", "badge"],
