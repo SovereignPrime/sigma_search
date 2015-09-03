@@ -34,6 +34,7 @@ render_element(Rec = #sigma_search{
                         placeholder=Placeholder,
                         textbox_class=TextboxClass,
                         results_class=ResultsClass,
+                        style=Style,
                         search_button_class=SearchButtonClass,
                         search_button_text=SearchButtonText,
                         clear_button_class=ClearClass,
@@ -95,6 +96,7 @@ render_element(Rec = #sigma_search{
      #panel{
         id=MyId,
         class=["sigma_search", WrapperClass],
+        style=Style,
         body=[
               #panel{
                  id=BadgesId,
@@ -108,8 +110,12 @@ render_element(Rec = #sigma_search{
                                 Badges)
                 },
               #textbox{
-                 class=[sigma_search_textbox, wfid_sigma_search_textbox, TextboxClass],
+                 class=[sigma_search_textbox,
+                        wfid_sigma_search_textbox,
+                        TextboxClass],
+
                  postback=Postback,
+                 style="box-shadow: none;",
                  delegate=?MODULE,
                  id=Textboxid,
                  placeholder=Placeholder,
