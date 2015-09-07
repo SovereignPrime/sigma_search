@@ -203,11 +203,11 @@ event(#postback{
                                                  SearchButtonid,
                                                  Clearid
                                                 )}),
-            case ShowResult of
+            case ShowResult andalso Body /= [] of
                 true ->
                     wf:wire(Resultsid, #slide_down{});
                 _ ->
-                    ok
+                    wf:wire(Resultsid,#fade{})
             end
 	end;
 event({filter, #postback{
